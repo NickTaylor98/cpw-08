@@ -21,7 +21,7 @@ const server = net.createServer((client) => {
                     let object = { pid: pid, id: id, startedOn: date };
                     //console.log(object);
                     clients.set(id, object);
-                    client.write(JSON.stringify(object));
+                    write(client, object);
                 }
                 break;
             case 'delete':
@@ -31,13 +31,19 @@ const server = net.createServer((client) => {
                     process.kill(clt.pid);
                     fs.readFile(__dirname + `/JSON/${id}_rand.json`, 'utf8', (err, data) => {
                         clt.numbers = JSON.parse(data);
-                        client.write(JSON.stringify(clt));
+                        write(client, clt);
+                        clients.delete(id);
                     });
                 }
                 break;
             case 'get':
                 {
-                    client.write(JSON.stringify(clients));
+                    const array = [];
+                    clients.forEach(function(element) {
+                        array.push(element);
+                    }, this);
+                    console.log(array);
+                    write(client, array);
                 }
                 break;
         }
@@ -49,3 +55,7 @@ const server = net.createServer((client) => {
 server.listen(port, () => {
     console.log(`Server listening on localhost: ${port}`);
 });
+function write(client, data)
+{
+    client.write(JSON.stringify(data));
+}
